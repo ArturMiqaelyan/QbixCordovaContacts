@@ -4,6 +4,7 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
+import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
@@ -11,6 +12,11 @@ import android.provider.ContactsContract;
 import android.util.Log;
 
 import org.apache.cordova.CordovaInterface;
+
+import com.q.users.cordova.plugin.AccNameGroup;
+import com.q.users.cordova.plugin.QbixGroup;
+import com.q.users.cordova.plugin.RawIdLabelId;
+import com.q.users.cordova.plugin.GroupHelper;
 
 import java.util.ArrayList;
 import java.util.HashMap;
