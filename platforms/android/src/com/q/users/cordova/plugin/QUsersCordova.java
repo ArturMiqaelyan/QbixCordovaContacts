@@ -24,6 +24,7 @@ public class QUsersCordova extends CordovaPlugin {
     private final String ADD_CONTACT_TO_LABEL_ACTION = "addContact";
     private final String REMOVE_LABEL_ACTION = "remove";
     private final String SAVE_NEW_LABEL_OR_EDIT = "save";
+    private final String SET_LABEL_LIST_FOR_CONTACT = "setForContact";
 
     private final String READ = Manifest.permission.READ_CONTACTS;
     private final String WRITE = Manifest.permission.WRITE_CONTACTS;
@@ -36,6 +37,7 @@ public class QUsersCordova extends CordovaPlugin {
     private final int ADD_CONTACT_TO_LABEL_REQ_CODE = 11;
     private final int REMOVE_LABEL_REQ_CODE = 12;
     private final int SAVE_NEW_LABEL_OR_EDIT_REQ_CODE = 13;
+    private final int SET_LABEL_LIST_FOR_CONTACT_REQ_CODE = 14;
 
     //Error codes for returning with error plugin result
     protected static final String UNKNOWN_ERROR = "unknown error";
@@ -102,11 +104,11 @@ public class QUsersCordova extends CordovaPlugin {
             }
 
             return true;
-        }else if(action.equals(GET_ONE_OR_MORE_LABELS_ACTION)){
+        } else if (action.equals(GET_ONE_OR_MORE_LABELS_ACTION)) {
             if (PermissionHelper.hasPermission(this, READ)) {
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                            getLabels(executeArgs);
+                        getLabels(executeArgs);
                     }
                 });
             } else {
@@ -126,8 +128,8 @@ public class QUsersCordova extends CordovaPlugin {
         } else if (action.equals(ADD_CONTACT_TO_LABEL_ACTION)) {
             if (PermissionHelper.hasPermission(this, WRITE)) {
                 this.cordova.getThreadPool().execute(new Runnable() {
-                    public void run() {                  
-                            addContactToLabel(executeArgs);
+                    public void run() {
+                        addContactToLabel(executeArgs);
                     }
                 });
             } else {
@@ -154,6 +156,16 @@ public class QUsersCordova extends CordovaPlugin {
                 });
             } else {
                 getAccountPermission(SAVE_NEW_LABEL_OR_EDIT_REQ_CODE);
+            }
+        } else if (action.equals(SET_LABEL_LIST_FOR_CONTACT)) {
+            if (PermissionHelper.hasPermission(this, WRITE)) {
+                this.cordova.getThreadPool().execute(new Runnable() {
+                    public void run() {
+                        setLabelListForContact(executeArgs);
+                    }
+                });
+            } else {
+                getWritePermission(SET_LABEL_LIST_FOR_CONTACT_REQ_CODE);
             }
         }
         return false;
@@ -195,7 +207,7 @@ public class QUsersCordova extends CordovaPlugin {
             }
             String[] sourceIdArray = new String[sourceIdList.size()];
             for (int i = 0; i < sourceIdList.size(); i++) {
-                sourceIdArray[i]=sourceIdList.get(i);
+                sourceIdArray[i] = sourceIdList.get(i);
             }
             List<QbixGroup> labels = groupAccessor.getLabelsBySourceId(sourceIdArray);
             JSONArray jsonGroups = new JSONArray();
@@ -319,6 +331,31 @@ public class QUsersCordova extends CordovaPlugin {
         }
     }
 
+    /**
+     * Sets list of labels to given contact (if list is empty, removes all existing non system related labels)
+     *
+     * @param args Arguments from {@link #execute(String, JSONArray, CallbackContext)} method
+     */
+    private void setLabelListForContact(JSONArray args) {
+        try {
+            String contactId = args.getString(0);
+            JSONArray labelIds = args.getJSONArray(1);
+            List<String> labelIdList = new ArrayList<>();
+            for (int i = 0; i < labelIds.length(); i++) {
+                labelIdList.add(labelIds.getString(i));
+            }
+            String removeMessage = groupAccessor.setLabelListForContact(contactId, labelIdList);
+            if (removeMessage.equals(SUCCESS)) {
+                callbackContext.success();
+            } else {
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, removeMessage));
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.JSON_EXCEPTION, e.getMessage()));
+        }
+    }
+
     public void onRequestPermissionResult(int requestCode, String[] permissions,
                                           int[] grantResults) {
         for (int r : grantResults) {
@@ -334,7 +371,7 @@ public class QUsersCordova extends CordovaPlugin {
             case REMOVE_CONTACT_FROM_LABEL_REQ_CODE:
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                            removeContactFromLabel(executeArgs);
+                        removeContactFromLabel(executeArgs);
                     }
                 });
                 break;
@@ -348,7 +385,7 @@ public class QUsersCordova extends CordovaPlugin {
             case LABELS_BY_SOURCE_ID_REQ_CODE:
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                            getLabels(executeArgs);
+                        getLabels(executeArgs);
                     }
                 });
                 break;
@@ -356,6 +393,13 @@ public class QUsersCordova extends CordovaPlugin {
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
                         saveOrEditLabel(executeArgs);
+                    }
+                });
+                break;
+            case SET_LABEL_LIST_FOR_CONTACT_REQ_CODE:
+                this.cordova.getThreadPool().execute(new Runnable() {
+                    public void run() {
+                        setLabelListForContact(executeArgs);
                     }
                 });
                 break;
