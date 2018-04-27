@@ -188,7 +188,7 @@ public class QUsersCordova extends CordovaPlugin {
             if (PermissionHelper.hasPermission(this, READ) && PermissionHelper.hasPermission(this, ACCOUNTS)) {
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                        getNativeLabelForContact(executeArgs);
+                        getLabelsForContact(executeArgs);
                     }
                 });
             } else {
@@ -380,9 +380,11 @@ public class QUsersCordova extends CordovaPlugin {
     }
 
     /**
+     * Gets labels of given contact ids.
+     *
      * @param args Arguments from {@link #execute(String, JSONArray, CallbackContext)} method
      */
-    private void getNativeLabelForContact(JSONArray args) {
+    private void getLabelsForContact(JSONArray args) {
         try {
             JSONArray contactIds = args.getJSONArray(0);
             List<String> contactIdList = new ArrayList<>();
@@ -461,7 +463,7 @@ public class QUsersCordova extends CordovaPlugin {
             case GET_NATIVE_LABEL_FOR_CONTACT_REQ_CODE:
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                        getNativeLabelForContact(executeArgs);
+                        getLabelsForContact(executeArgs);
                     }
                 });
                 break;
