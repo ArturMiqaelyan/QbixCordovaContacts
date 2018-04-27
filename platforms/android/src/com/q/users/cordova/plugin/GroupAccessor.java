@@ -4,19 +4,15 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.ContentProviderOperation;
 import android.content.ContentProviderResult;
-import android.content.Context;
 import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.os.RemoteException;
 import android.provider.ContactsContract;
 import android.util.Log;
 
-import org.apache.cordova.CordovaInterface;
+import com.example.hello.MainActivity;
 
-import com.q.users.cordova.plugin.AccNameGroup;
-import com.q.users.cordova.plugin.QbixGroup;
-import com.q.users.cordova.plugin.RawIdLabelId;
-import com.q.users.cordova.plugin.GroupHelper;
+import org.apache.cordova.CordovaInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -427,6 +423,29 @@ public class GroupAccessor {
             return e.getMessage();
         }
         return QUsersCordova.SUCCESS;
+    }
+
+    /**
+     * Gets labels of given contact ids.
+     *
+     * @param contactIds Contacts' ids which labels wanted to be returned
+     * @param doUnion union by labelIds if true, otherwise intersection
+     * @return list of {@link QbixGroup} POJO
+     */
+    protected List<QbixGroup> getLabelsByContactIds(List<String> contactIds, boolean doUnion){
+        String[] contactIdArray = new String[contactIds.size()];
+        for (int i = 0; i < contactIds.size(); i++) {
+            contactIdArray[i] = contactIds.get(i);
+        }
+        String[] rawIds = GroupHelper.getRawContactIds(app.getActivity(), contactIdArray);
+        String[] sourceIds;
+        if (doUnion) {
+            sourceIds = GroupHelper.getUnionSourceIds(app.getActivity(), rawIds);
+        } else {
+            sourceIds = GroupHelper.getNotUnionSourceIds(app.getActivity(), rawIds);
+        }
+        List<QbixGroup> groupList = getLabelsBySourceId(sourceIds);
+        return groupList;
     }
 
 }
