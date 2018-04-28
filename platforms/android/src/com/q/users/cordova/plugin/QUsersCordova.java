@@ -45,7 +45,7 @@ public class QUsersCordova extends CordovaPlugin {
 
     //smart names
     /**
-     * Get contacts which don’t belong to any group.
+     * Get contacts which dont belong to any group.
      */
     protected static final String UNCATEGORIZED_SMART_NAME = "uncategorized";
     /**
@@ -149,11 +149,11 @@ public class QUsersCordova extends CordovaPlugin {
             }
 
             return true;
-        } else if (action.equals(GET_ONE_OR_MORE_LABELS_ACTION)) {
+        }else if(action.equals(GET_ONE_OR_MORE_LABELS_ACTION)){
             if (PermissionHelper.hasPermission(this, READ) && PermissionHelper.hasPermission(this, ACCOUNTS)) {
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                        getLabels(executeArgs);
+                            getLabels(executeArgs);
                     }
                 });
             } else {
@@ -173,8 +173,8 @@ public class QUsersCordova extends CordovaPlugin {
         } else if (action.equals(ADD_CONTACT_TO_LABEL_ACTION)) {
             if (PermissionHelper.hasPermission(this, WRITE) && PermissionHelper.hasPermission(this, ACCOUNTS)) {
                 this.cordova.getThreadPool().execute(new Runnable() {
-                    public void run() {
-                        addContactToLabel(executeArgs);
+                    public void run() {                  
+                            addContactToLabel(executeArgs);
                     }
                 });
             } else {
@@ -498,7 +498,7 @@ public class QUsersCordova extends CordovaPlugin {
             case REMOVE_CONTACT_FROM_LABEL_REQ_CODE:
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                        removeContactFromLabel(executeArgs);
+                            removeContactFromLabel(executeArgs);
                     }
                 });
                 break;
@@ -519,7 +519,7 @@ public class QUsersCordova extends CordovaPlugin {
             case LABELS_BY_SOURCE_ID_REQ_CODE:
                 this.cordova.getThreadPool().execute(new Runnable() {
                     public void run() {
-                        getLabels(executeArgs);
+                            getLabels(executeArgs);
                     }
                 });
                 break;

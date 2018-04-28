@@ -5,7 +5,7 @@ import org.json.JSONObject;
 public class QbixPhoto {
 
     Number photoFileId;
-    String photo;   //base64
+    String photo;
 
     public JSONObject toJson() {
         try {

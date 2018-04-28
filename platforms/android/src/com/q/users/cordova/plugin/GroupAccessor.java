@@ -237,7 +237,6 @@ public class GroupAccessor {
      * @param sourceIds Source ids list which labels wanted to be returned.
      * @return list of {@link QbixGroup} POJO
      */
-
     protected List<QbixGroup> getLabelsBySourceId(String[] sourceIds) {
         Cursor groupCursor = app.getActivity().getContentResolver().query(ContactsContract.Groups.CONTENT_SUMMARY_URI,
                 new String[]{
@@ -483,6 +482,4 @@ public class GroupAccessor {
         }
         return contactList;
     }
-
-
 }
