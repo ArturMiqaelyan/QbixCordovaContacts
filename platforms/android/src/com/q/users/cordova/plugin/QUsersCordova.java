@@ -1,16 +1,20 @@
 package com.q.users.cordova.plugin;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-
 import org.apache.cordova.CallbackContext;
+import org.apache.cordova.CordovaActivity;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.LOG;
 import org.apache.cordova.PermissionHelper;
 import org.apache.cordova.PluginResult;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
+
+import com.q.users.cordova.plugin.QbixGroup;
 
 import java.util.ArrayList;
 import java.util.List;
