@@ -10,8 +10,6 @@ import android.provider.ContactsContract;
 import android.util.Base64;
 import android.util.Log;
 
-import com.q.users.cordova.plugin.RawIdLabelId;
-
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -821,6 +819,35 @@ public class GroupHelper {
         String[] contactIdArray = new String[emailContacts.size()];
         for (int i = 0; i < contactIdArray.length; i++) {
             contactIdArray[i] = emailContacts.get(i);
+        }
+        return contactIdArray;
+    }
+
+    /**
+     * Gets all contactIds, that have phone number field(s).
+     *
+     * @param context Context instance for db interactions
+     * @return Array of contact Ids
+     */
+    public static String[] smartHasPhone(Context context) {
+        List<String> phoneContacts = new ArrayList<>();
+        Cursor phoneCursor = context.getContentResolver().query(ContactsContract.Data.CONTENT_URI,
+                new String[]{
+                        ContactsContract.Data.CONTACT_ID
+                },
+                ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE + "'",
+                null,
+                null);
+        while (phoneCursor.moveToNext()) {
+            String contactId = phoneCursor.getString(phoneCursor.getColumnIndex(ContactsContract.Data.CONTACT_ID));
+            if (!phoneContacts.contains(contactId)) {
+                phoneContacts.add(contactId);
+            }
+        }
+        phoneCursor.close();
+        String[] contactIdArray = new String[phoneContacts.size()];
+        for (int i = 0; i < contactIdArray.length; i++) {
+            contactIdArray[i] = phoneContacts.get(i);
         }
         return contactIdArray;
     }
