@@ -14,6 +14,7 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class QUsersCordova extends CordovaPlugin {
 
     //Actions
@@ -77,7 +78,6 @@ public class QUsersCordova extends CordovaPlugin {
     private JSONArray executeArgs;
     private GroupAccessor groupAccessor;
     private CallbackContext callbackContext;   // The callback context from which we were invoked.
-    private String TAG = "doublecheck";
 
     /**
      * Constructor.
@@ -171,6 +171,7 @@ public class QUsersCordova extends CordovaPlugin {
             } else {
                 getDoublePermission(REMOVE_CONTACT_FROM_LABEL_REQ_CODE, WRITE, ACCOUNTS);
             }
+
             return true;
         } else if (action.equals(ADD_CONTACT_TO_LABEL_ACTION)) {
             if (PermissionHelper.hasPermission(this, WRITE) && PermissionHelper.hasPermission(this, ACCOUNTS)) {
@@ -182,6 +183,7 @@ public class QUsersCordova extends CordovaPlugin {
             } else {
                 getDoublePermission(ADD_CONTACT_TO_LABEL_REQ_CODE, WRITE, ACCOUNTS);
             }
+
             return true;
         } else if (action.equals(REMOVE_LABEL_ACTION)) {
             if (PermissionHelper.hasPermission(this, WRITE) && PermissionHelper.hasPermission(this, ACCOUNTS)) {
@@ -193,6 +195,7 @@ public class QUsersCordova extends CordovaPlugin {
             } else {
                 getDoublePermission(REMOVE_LABEL_REQ_CODE, WRITE, ACCOUNTS);
             }
+
             return true;
         } else if (action.equals(SAVE_NEW_LABEL_OR_EDIT)) {
             if (PermissionHelper.hasPermission(this, WRITE) && PermissionHelper.hasPermission(this, ACCOUNTS)) {
@@ -271,14 +274,9 @@ public class QUsersCordova extends CordovaPlugin {
     private void getLabels(JSONArray args) {
         try {
             JSONArray labelIdArray = args.getJSONArray(0);
-            List<String> sourceIdList = new ArrayList<>();
+            String[] sourceIdArray = new String[labelIdArray.length()];
             for (int i = 0; i < labelIdArray.length(); i++) {
-                String sourceId = labelIdArray.getString(i);
-                sourceIdList.add(sourceId);
-            }
-            String[] sourceIdArray = new String[sourceIdList.size()];
-            for (int i = 0; i < sourceIdList.size(); i++) {
-                sourceIdArray[i] = sourceIdList.get(i);
+               sourceIdArray[i] = labelIdArray.getString(i);
             }
             List<QbixGroup> labels = groupAccessor.getLabelsBySourceId(sourceIdArray);
             JSONArray jsonGroups = new JSONArray();
@@ -467,12 +465,11 @@ public class QUsersCordova extends CordovaPlugin {
     private void smart(JSONArray args) {
         try {
             String name = args.getString(0);
-            List<QbixContact> contacts = groupAccessor.getContactList(name);
+            String[] contacts = groupAccessor.getContactList(name);
             if (contacts != null) {
                 JSONArray jsonContacts = new JSONArray();
-                for (QbixContact contact :
-                        contacts) {
-                    jsonContacts.put(contact.toJson());
+                for (int i = 0; i < contacts.length; i++) {
+                    jsonContacts.put(contacts[i]);
                 }
                 callbackContext.success(jsonContacts);
             } else {
