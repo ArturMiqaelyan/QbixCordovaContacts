@@ -451,7 +451,7 @@ public class QUsersCordova extends CordovaPlugin {
     }
 
     /**
-     * Gets and sorts contacts depending on "smart name" which defined in args param.
+     * Gets and sorts contactIds depending on "smart name" which defined in args param.
      * (See description of names
      * {@link QUsersCordova#UNCATEGORIZED_SMART_NAME},
      * {@link QUsersCordova#BY_LAST_TIME_UPDATED_SMART_NAME},
