@@ -15,10 +15,6 @@
                         {
                             "xml": "<feature name=\"QUsersCordova\"><param name=\"android-package\" value=\"com.q.users.cordova.plugin.QUsersCordova\" /></feature>",
                             "count": 1
-                        },
-                        {
-                            "xml": "<feature name=\"QUsersCordovaTest\"><param name=\"android-package\" value=\"com.q.users.cordova.test.QUsersCordovaTest\" /></feature>",
-                            "count": 1
                         }
                     ]
                 }

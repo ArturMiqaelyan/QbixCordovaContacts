@@ -9,7 +9,10 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -85,7 +88,7 @@ public class GroupHelper {
                 Log.i("contactId_checker", "contains: " + rawIdContactId.get(String.valueOf(rawIds.get(i))));
             }
         }
-        return rawIds;
+        return contactIds;
     }
 
     /**
@@ -99,6 +102,8 @@ public class GroupHelper {
         if (count == 1) {
             //checks if there is 1 argument
             selectionSuffix += "?)";
+        } else if (count == 0) {
+            return "";
         } else {
             for (int i = 0; i < count; i++) {
                 if (i == 0) {
@@ -296,7 +301,7 @@ public class GroupHelper {
     /**
      * Converts given sourceId to Array of labelIds with that sourceId.
      *
-     * @param context  Context instance for db interactions
+     * @param context Context instance for db interactions
      * @param sourceId SourceId which must be converted into labelId array
      * @return Array of labelIds converted from given sourceId
      */
@@ -341,6 +346,31 @@ public class GroupHelper {
         }
         cursor.close();
         return systemIds;
+    }
+
+    /**
+     * Gets all read only label sourceIds.
+     *
+     * @param context Context instance for db interactions
+     * @return List of read only labels' sourceIds
+     */
+    public static List<String> getReadOnlyIds(Context context) {
+        List<String> readOnlyIds = new ArrayList<>();
+        Cursor cursor = context.getContentResolver().query(ContactsContract.Groups.CONTENT_URI,
+                new String[]{
+                        ContactsContract.Groups.SOURCE_ID
+                },
+                ContactsContract.Groups.GROUP_IS_READ_ONLY + "='1'",
+                null,
+                null
+        );
+        while (cursor.moveToNext()) {
+            if (!readOnlyIds.contains(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)))) {
+                readOnlyIds.add(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)));
+            }
+        }
+        cursor.close();
+        return readOnlyIds;
     }
 
     /**
@@ -430,9 +460,9 @@ public class GroupHelper {
                 ContactsContract.Groups._ID + getSuffix(labelIds.length),
                 labelIds,
                 null);
-        while (cursor.moveToNext()) {
+        while (cursor.moveToNext()){
             String sourceId = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID));
-            if (sourceId != null && !sourceIdList.contains(sourceId)) {
+            if(sourceId !=null && !sourceIdList.contains(sourceId)){
                 sourceIdList.add(sourceId);
             }
         }
@@ -589,7 +619,7 @@ public class GroupHelper {
                 null);
         while (allContactCursor.moveToNext()) {
             String contactId = allContactCursor.getString(allContactCursor.getColumnIndex(ContactsContract.Contacts._ID));
-            if (!allContactIds.contains(contactId)) {
+            if (!allContactIds.contains(contactId)){
                 allContactIds.add(contactId);
             }
         }
@@ -601,13 +631,13 @@ public class GroupHelper {
                     new String[]{
                             ContactsContract.Data.DATA1
                     },
-                    ContactsContract.Data.CONTACT_ID + "='" + allContactIds.get(i)
-                            + "' AND " + ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE + "'",
+                    ContactsContract.Data.CONTACT_ID+"='"+allContactIds.get(i)
+                            +"' AND " + ContactsContract.Data.MIMETYPE + "='" + ContactsContract.CommonDataKinds.GroupMembership.CONTENT_ITEM_TYPE + "'",
                     null,
                     null);
             while (dataCursor.moveToNext()) {
                 String labelId = dataCursor.getString(dataCursor.getColumnIndex(ContactsContract.Data.DATA1));
-                if (!currentContactLabels.contains(labelId)) {
+                if(!currentContactLabels.contains(labelId)){
                     currentContactLabels.add(labelId);
                 }
             }
@@ -633,7 +663,7 @@ public class GroupHelper {
                 }
                 groupCursor.close();
             }
-            if (finalList.isEmpty()) {
+            if(finalList.isEmpty()){
                 uncategorizedContacts.add(allContactIds.get(i));
             }
         }
@@ -770,7 +800,7 @@ public class GroupHelper {
         List<String> byTimeContacts = new ArrayList<>();
         Cursor timeCursor = context.getContentResolver().query(ContactsContract.Contacts.CONTENT_URI,
                 new String[]{
-
+                        ContactsContract.Contacts._ID
                 },
                 null,
                 null,
