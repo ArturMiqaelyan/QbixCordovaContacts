@@ -62,46 +62,48 @@ public class GroupAccessor {
         List<String> sourceIds = new ArrayList<>();
         List<RawIdLabelId> rawIdLabelIds = GroupHelper.getExistingRawIdLabelIdPairs(app.getActivity());
         HashMap<String, String> rawIdContactIdPair = GroupHelper.getExistingRawIdContactIdPairs(app.getActivity());
+        List<String> systemIds = GroupHelper.getSystemIds(app.getActivity());
         while (cursor.moveToNext()) {
-            QbixGroup group = new QbixGroup();
+            if (!systemIds.contains(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups._ID)))) {
+                QbixGroup group = new QbixGroup();
 
-            group.sourceId = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID));
-            group.title = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.TITLE));
-            group.notes = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.NOTES));
-            group.summaryCount = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.SUMMARY_COUNT));
-            group.isVisible = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.GROUP_VISIBLE)) == 0;
-            group.isDeleted = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.DELETED)) == 1;
-            group.shouldSync = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.SHOULD_SYNC)) == 1;
-            group.readOnly = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.GROUP_IS_READ_ONLY)) == 1;
-            Log.i("group_info_checker", "id: " + cursor.getString(cursor.getColumnIndex(ContactsContract.Groups._ID)));
-            Log.i("group_info_checker", "source_id: " + group.sourceId);
-            Log.i("group_info_checker", "title: " + group.title);
-            Log.i("group_info_checker", "notes: " + group.notes);
-            Log.i("group_info_checker", "summary_count: " + group.summaryCount);
-            Log.i("group_info_checker", "is_visible: " + group.isVisible);
-            Log.i("group_info_checker", "deleted: " + group.isDeleted);
-            Log.i("group_info_checker", "should_sync: " + group.shouldSync);
-            Log.i("group_info_checker", "read_only: " + group.readOnly);
-            String labelId = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups._ID));
-            List<Integer> rawIds = new ArrayList<>();
-            for (int i = 0; i < rawIdLabelIds.size(); i++) {
-                if (rawIdLabelIds.get(i).labelId.equals(labelId)) {
-                    rawIds.add(Integer.valueOf(rawIdLabelIds.get(i).rawId));
+                group.sourceId = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID));
+                group.title = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.TITLE));
+                group.notes = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.NOTES));
+                group.summaryCount = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.SUMMARY_COUNT));
+                group.isVisible = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.GROUP_VISIBLE)) == 0;
+                group.isDeleted = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.DELETED)) == 1;
+                group.shouldSync = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.SHOULD_SYNC)) == 1;
+                group.readOnly = cursor.getInt(cursor.getColumnIndex(ContactsContract.Groups.GROUP_IS_READ_ONLY)) == 1;
+                Log.i("group_info_checker", "id: " + cursor.getString(cursor.getColumnIndex(ContactsContract.Groups._ID)));
+                Log.i("group_info_checker", "source_id: " + group.sourceId);
+                Log.i("group_info_checker", "title: " + group.title);
+                Log.i("group_info_checker", "notes: " + group.notes);
+                Log.i("group_info_checker", "summary_count: " + group.summaryCount);
+                Log.i("group_info_checker", "is_visible: " + group.isVisible);
+                Log.i("group_info_checker", "deleted: " + group.isDeleted);
+                Log.i("group_info_checker", "should_sync: " + group.shouldSync);
+                Log.i("group_info_checker", "read_only: " + group.readOnly);
+                String labelId = cursor.getString(cursor.getColumnIndex(ContactsContract.Groups._ID));
+                List<Integer> rawIds = new ArrayList<>();
+                for (int i = 0; i < rawIdLabelIds.size(); i++) {
+                    if (rawIdLabelIds.get(i).labelId.equals(labelId)) {
+                        rawIds.add(Integer.valueOf(rawIdLabelIds.get(i).rawId));
+                    }
+                }
+                List<Integer> contactIds = GroupHelper.getContactIds(rawIdContactIdPair, rawIds);
+                if (group.sourceId != null) {
+                    if (!sourceIds.contains(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)))) {
+                        group.contactIds = contactIds;
+                        sourceIds.add(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)));
+                        labels.add(group);
+                    } else {
+                        int index = sourceIds.indexOf(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)));
+                        labels.get(index).contactIds.addAll(contactIds);
+                        Log.i("group_info_checker", "group: " + cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)) + " is existing");
+                    }
                 }
             }
-            List<Integer> contactIds = GroupHelper.getContactIds(rawIdContactIdPair, rawIds);
-            if (group.sourceId != null) {
-                if (!sourceIds.contains(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)))) {
-                    group.contactIds = contactIds;
-                    sourceIds.add(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)));
-                    labels.add(group);
-                } else {
-                    int index = sourceIds.indexOf(cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)));
-                    labels.get(index).contactIds.addAll(contactIds);
-                    Log.i("group_info_checker", "group: " + cursor.getString(cursor.getColumnIndex(ContactsContract.Groups.SOURCE_ID)) + " is existing");
-                }
-            }
-
         }
         cursor.close();
         return labels;
@@ -624,5 +626,53 @@ public class GroupAccessor {
                 break;
         }
         return contactIds;
+    }
+
+    /**
+     * Gets all accounts for given contactIds and binds contact ids to them.
+     * Each account name ({@link AccountContactIds#accName}) and account type ({@link AccountContactIds#accType})
+     * pairs will be unique in returning list and will have a list of contact ids ({@link AccountContactIds#contactIds})
+     * which belongs to that account.
+     *
+     * @param contactIds ContactIds which account names wanted to be known
+     * @return list of {@link AccountContactIds} POJO
+     */
+    protected List<AccountContactIds> getAccountContactIdsPairs(String[] contactIds) {
+        List<AccountContactIds> accountContactIdsPairs = new ArrayList<>();
+        List<String> existingAccounts = new ArrayList<>();
+        Cursor cursor = app.getActivity().getContentResolver().query(ContactsContract.RawContacts.CONTENT_URI,
+                new String[]{
+                        ContactsContract.RawContacts.CONTACT_ID,
+                        ContactsContract.RawContacts.ACCOUNT_NAME,
+                        ContactsContract.RawContacts.ACCOUNT_TYPE
+                },
+                ContactsContract.RawContacts.CONTACT_ID + GroupHelper.getSuffix(contactIds.length),
+                contactIds,
+                null);
+        while (cursor.moveToNext()) {
+            String accName = cursor.getString(cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_NAME));
+            String accType = cursor.getString(cursor.getColumnIndex(ContactsContract.RawContacts.ACCOUNT_TYPE));
+            String contactId = cursor.getString(cursor.getColumnIndex(ContactsContract.RawContacts.CONTACT_ID));
+            if (existingAccounts.contains(accName + "/" + accType)) {
+                boolean exists = false;   //for testing
+                for (int i = 0; i < accountContactIdsPairs.size(); i++) {
+                    if (accountContactIdsPairs.get(i).accName.equals(accName)) {
+                        accountContactIdsPairs.get(i).contactIds.add(contactId);
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    Log.d("wrong_logic_checker", accName + " is not existing");
+                }
+            } else {
+                AccountContactIds accountContactIdsPair = new AccountContactIds(accName, accType);
+                accountContactIdsPair.contactIds.add(contactId);
+                accountContactIdsPairs.add(accountContactIdsPair);
+                existingAccounts.add(accName + "/" + accType);
+            }
+        }
+        cursor.close();
+        return accountContactIdsPairs;
     }
 }

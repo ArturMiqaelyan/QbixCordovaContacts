@@ -234,7 +234,7 @@ public class GroupAccessor {
                         }
 
                     }
-                    errorMessage += " Label " + sourceId + " is not shared with the contact.";
+                    errorMessage+= " Label "+sourceId+" is not shared with the contact.";
                     return errorMessage;
                 }
 
@@ -510,7 +510,7 @@ public class GroupAccessor {
                 }
 
                 if (!failedList.isEmpty()) {
-                    String errorMessage = "Failed to add following labels to contact " + contactId + ": ";
+                    String errorMessage = "Failed to add following labels to contact "+contactId+": ";
                     for (int i = 0; i < failedList.size(); i++) {
                         errorMessage += failedList.get(i);
                         if (i != (failedList.size() - 1)) {
@@ -519,7 +519,7 @@ public class GroupAccessor {
                             errorMessage += ".";
                         }
                     }
-                    errorMessage += " Contact " + contactId + " is not shared with the labels.";
+                    errorMessage+= " Contact "+contactId+" is not shared with the labels.";
                     return errorMessage;
                 }
 
@@ -624,9 +624,9 @@ public class GroupAccessor {
 
     /**
      * Gets all accounts for given contactIds and binds contact ids to them.
-     * Each account name ({@link AccountContactIds#accName}) will be unique in returning list
-     * and will have a list of contact ids ({@link AccountContactIds#contactIds}) which
-     * belongs to that account.
+     * Each account name ({@link AccountContactIds#accName}) and account type ({@link AccountContactIds#accType})
+     * pairs will be unique in returning list and will have a list of contact ids ({@link AccountContactIds#contactIds})
+     * which belongs to that account.
      *
      * @param contactIds ContactIds which account names wanted to be known
      * @return list of {@link AccountContactIds} POJO

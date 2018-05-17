@@ -254,7 +254,6 @@ public class QUsersCordova extends CordovaPlugin {
 
             return true;
         }
-
         return false;
     }
 
@@ -269,7 +268,11 @@ public class QUsersCordova extends CordovaPlugin {
                     labels) {
                 jsonGroups.put(group.toJson());
             }
-            callbackContext.success(jsonGroups);
+            if (labels != null) {
+                callbackContext.success(jsonGroups);
+            } else {
+                callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, UNKNOWN_ERROR));
+            }
         } else {
             this.callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, NO_ACCOUNT_ERROR));
         }
@@ -296,7 +299,8 @@ public class QUsersCordova extends CordovaPlugin {
                     for (int i = 0; i < labelIdArray.length(); i++) {
                         sourceIdArray[i] = labelIdArray.getString(i);
                     }
-                    List<QbixGroup> labels = groupAccessor.getLabelsBySourceId(sourceIdArray);
+                    String[] filteredArray = ValidationUtil.cleanFromDuplicates(sourceIdArray);
+                    List<QbixGroup> labels = groupAccessor.getLabelsBySourceId(filteredArray);
                     JSONArray jsonGroups = new JSONArray();
                     for (QbixGroup group :
                             labels) {
@@ -336,7 +340,8 @@ public class QUsersCordova extends CordovaPlugin {
                     for (int i = 0; i < contactIds.length(); i++) {
                         idArray[i] = contactIds.getString(i);
                     }
-                    String removeMessage = groupAccessor.removeLabelFromContacts(labelId, idArray);
+                    String[] filteredArray = ValidationUtil.cleanFromDuplicates(idArray);
+                    String removeMessage = groupAccessor.removeLabelFromContacts(labelId, filteredArray);
                     if (removeMessage.equals(SUCCESS)) {
                         callbackContext.success();
                     } else {
@@ -375,11 +380,10 @@ public class QUsersCordova extends CordovaPlugin {
                     for (int i = 0; i < contactIds.length(); i++) {
                         idArray[i] = contactIds.getString(i);
                     }
-                    String addMessage = groupAccessor.addLabelToContacts(labelId, idArray);
+                    String[] filteredArray = ValidationUtil.cleanFromDuplicates(idArray);
+                    String addMessage = groupAccessor.addLabelToContacts(labelId, filteredArray);
                     if (addMessage.equals(SUCCESS)) {
                         callbackContext.success();
-                    } else if (addMessage.equals(UNKNOWN_ERROR)) {
-                        callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, addMessage));
                     } else {
                         callbackContext.sendPluginResult(new PluginResult(PluginResult.Status.ERROR, addMessage));
                     }
@@ -487,7 +491,8 @@ public class QUsersCordova extends CordovaPlugin {
                     for (int i = 0; i < labelIds.length(); i++) {
                         idArray[i] = labelIds.getString(i);
                     }
-                    String removeMessage = groupAccessor.setLabelListForContact(contactId, idArray);
+                    String[] filteredArray = ValidationUtil.cleanFromDuplicates(idArray);
+                    String removeMessage = groupAccessor.setLabelListForContact(contactId, filteredArray);
                     if (removeMessage.equals(SUCCESS)) {
                         callbackContext.success();
                     } else {
@@ -526,7 +531,8 @@ public class QUsersCordova extends CordovaPlugin {
                         contactIdList.add(contactIds.getString(i));
                     }
                     boolean doUnion = args.getBoolean(1);
-                    List<QbixGroup> labels = groupAccessor.getLabelsByContactIds(contactIdList, doUnion);
+                    List<String> filteredList = ValidationUtil.cleanFromDuplicates(contactIdList);
+                    List<QbixGroup> labels = groupAccessor.getLabelsByContactIds(filteredList, doUnion);
                     JSONArray jsonGroups = new JSONArray();
                     for (QbixGroup group :
                             labels) {
@@ -594,7 +600,7 @@ public class QUsersCordova extends CordovaPlugin {
     }
 
     /**
-     * Binds given contacts' ids to their account's name.
+     * Binds given contacts' ids to their account's name and type.
      *
      * @param args Arguments from {@link #execute(String, JSONArray, CallbackContext)} method
      */
@@ -613,7 +619,8 @@ public class QUsersCordova extends CordovaPlugin {
                     for (int i = 0; i < contactIds.length(); i++) {
                         idsArray[i] = contactIds.getString(i);
                     }
-                    List<AccountContactIds> accountContactIdsPairs = groupAccessor.getAccountContactIdsPairs(idsArray);
+                    String[] filteredArray = ValidationUtil.cleanFromDuplicates(idsArray);
+                    List<AccountContactIds> accountContactIdsPairs = groupAccessor.getAccountContactIdsPairs(filteredArray);
                     JSONArray jsonAccNameContacts = new JSONArray();
                     for (int i = 0; i < accountContactIdsPairs.size(); i++) {
                         jsonAccNameContacts.put(accountContactIdsPairs.get(i).toJson());
